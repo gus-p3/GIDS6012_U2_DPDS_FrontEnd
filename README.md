@@ -1,69 +1,218 @@
-# Ejercicio5Cliente (FrontEnd) — Upgrade a Java 21 y Configuración CI/CD en Jenkins
+# Evidencia de Actualización y Upgrade a Java 21 en Microservicios y Jenkins
 
 **Asignatura:** Gestión del Proceso de Desarrollo de Software (GIDS6102 - Unidad 2)  
 **Estudiante:** Gustavo Mendoza  
-**Microservicio:** FrontEnd (`Ejercicio5Cliente` - Interfaz Web Spring Boot + Thymeleaf + Bootstrap)
+**Fecha:** 21 de Octubre de 2026  
 
 ---
 
-## 1. Ligas de GitHub (Repositorios Listos para Utilizar)
+## 1. Ligas de Repositorios en GitHub (Listos para Utilizarse)
 
-* **Repositorio FrontEnd (`Ejercicio5Cliente`):** [https://github.com/gus-p3/GIDS6012_U2_DPDS_FrontEnd.git](https://github.com/gus-p3/GIDS6012_U2_DPDS_FrontEnd.git)
-* **Repositorio BackEnd (`Ejercicio5MyAPIGestor`):** [https://github.com/gus-p3/GIDS6012_U2_DPDS_BackEnd.git](https://github.com/gus-p3/GIDS6012_U2_DPDS_BackEnd.git)
+* **Repositorio BackEnd (`Ejercicio5MyAPIGestor`):**  
+  [https://github.com/gus-p3/GIDS6012_U2_DPDS_BackEnd.git](https://github.com/gus-p3/GIDS6012_U2_DPDS_BackEnd.git)
+* **Repositorio FrontEnd (`Ejercicio5Cliente`):**  
+  [https://github.com/gus-p3/GIDS6012_U2_DPDS_FrontEnd.git](https://github.com/gus-p3/GIDS6012_U2_DPDS_FrontEnd.git)
+* **Repositorio Integral del Instrumento:**  
+  [https://github.com/gus-p3/U2_GPDS_Instrumento.git](https://github.com/gus-p3/U2_GPDS_Instrumento.git)
 
 ---
 
-## 2. Configuración de Jenkins (JDK 21 y Maven)
+## 2. Configuración del Servidor Jenkins (JDK 21 y Maven 3.9.x)
 
-El servidor de Integración Continua (Jenkins) fue actualizado y configurado para operar nativamente sobre **JDK 21** y compilar ambos microservicios con **Apache Maven 3.9.x**:
+Para dar soporte a la compilación y pruebas de proyectos basados en Java 21, se aplicó la configuración correspondiente en el entorno de Integración Continua (Jenkins):
 
-* **Contenedor Jenkins:** `jenkins/jenkins:jdk21` (`OpenJDK Runtime Environment Temurin-21.0.12.1+1 LTS`)
-* **Configuración de JDK en Jenkins (`Manage Jenkins -> Tools -> JDK installations`):**
-  * **Name:** `JDK21`
-  * **JAVA_HOME:** `/opt/java/openjdk`
-* **Configuración de Maven en Jenkins (`Manage Jenkins -> Tools -> Maven installations`):**
-  * **Name:** `M3`
-  * **Versión:** `Maven 3.9.0` (Instalación automática desde Apache, compatible con compilación en Java 21 y Spring Boot 3.3.4).
+1. **Entorno / Runtime de Jenkins:**
+   * Contenedor e imagen base: `jenkins/jenkins:jdk21`
+   * Versión de Java en el host de ejecución: `OpenJDK Runtime Environment Temurin-21.0.12.1+1 LTS`
+2. **Configuración de JDK en Jenkins (`Manage Jenkins -> Tools -> JDK installations`):**
+   * **Nombre (Name):** `JDK21`
+   * **JAVA_HOME:** `/opt/java/openjdk`
+3. **Configuración de Maven en Jenkins (`Manage Jenkins -> Tools -> Maven installations`):**
+   * **Nombre (Name):** `M3`
+   * **Versión seleccionada:** `3.9.0` (o `3.9.6+` con opción "Instalar automáticamente desde Apache").
+   * *Justificación:* Maven 3.9.x proporciona soporte completo para el estándar de Java 21, compatibilidad con plugins actualizados y estabilidad frente al compilador `javac` con release 21.
 
-### Configuraciones XML aplicadas en Jenkins:
-```xml
-<!-- /var/jenkins_home/config.xml (JDK 21) -->
-<jdks>
-  <jdk>
-    <name>JDK21</name>
-    <home>/opt/java/openjdk</home>
-    <properties/>
-  </jdk>
-</jdks>
+### Declaración en Jenkinsfile / Declarative Pipeline:
+```groovy
+pipeline {
+    agent any
 
-<!-- /var/jenkins_home/hudson.tasks.Maven.xml (Maven 3.9.0) -->
-<hudson.tasks.Maven_-DescriptorImpl>
-  <installations>
-    <hudson.tasks.Maven_-MavenInstallation>
-      <name>M3</name>
-      <properties>
-        <hudson.tools.InstallSourceProperty>
-          <installers>
-            <hudson.tasks.Maven_-MavenInstaller>
-              <id>3.9.0</id>
-            </hudson.tasks.Maven_-MavenInstaller>
-          </installers>
-        </hudson.tools.InstallSourceProperty>
-      </properties>
-    </hudson.tasks.Maven_-MavenInstallation>
-  </installations>
-</hudson.tasks.Maven_-DescriptorImpl>
+    tools {
+        jdk 'JDK21'
+        maven 'M3'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', 
+                    credentialsId: 'github-credentials', 
+                    url: 'https://github.com/gus-p3/GIDS6012_U2_DPDS_BackEnd.git'
+            }
+        }
+        stage('Test & Coverage') {
+            steps {
+                sh 'mvn clean test jacoco:report'
+            }
+        }
+    }
+}
 ```
 
 ---
 
-## 3. Evidencia de Archivos `pom.xml` (Estado Original vs. Estado Actualizado)
+## 3. Evidencia de Archivos `pom.xml` (Estado Normal vs. Estado Actualizado)
 
-### 3.1. Microservicio FrontEnd (`Ejercicio5Cliente`)
+### 3.1. Microservicio 1: BackEnd (`Ejercicio5MyAPIGestor`)
 
-#### A) `pom.xml` en su estado normal (Original - Java 11 / Spring Boot 2.7.17)
-*(Archivo de referencia conservado en [`pom.original.xml`](./pom.original.xml))*
+#### A) Archivo `pom.xml` en su estado normal (Original - Java 11 / Spring Boot 2.7.17)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.7.17</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.mx.cbtis</groupId>
+	<artifactId>Ejercicio5MyAPIGestor</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Ejercicio5MyAPIGestor</name>
+	<description>Proyecto My API Rest</description>
+	<properties>
+		<java.version>11</java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
 
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+```
+
+#### B) Archivo `pom.xml` con su actualización (Actualizado - Java 21 / Spring Boot 3.3.4 + Plugins de Calidad y Pruebas)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.3.4</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.mx.cbtis</groupId>
+	<artifactId>Ejercicio5MyAPIGestor</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Ejercicio5MyAPIGestor</name>
+	<description>Proyecto My API Rest</description>
+	<properties>
+		<java.version>21</java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<!-- SonarQube Scanner Plugin -->
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>5.5.0.6356</version>
+			</plugin>
+
+			<!-- JaCoCo Plugin para reporte de cobertura de código -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Maven Surefire Plugin para ejecución de pruebas unitarias -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+```
+
+---
+
+### 3.2. Microservicio 2: FrontEnd (`Ejercicio5Cliente`)
+
+#### A) Archivo `pom.xml` en su estado normal (Original - Java 11 / Spring Boot 2.7.17)
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -118,9 +267,7 @@ El servidor de Integración Continua (Jenkins) fue actualizado y configurado par
 </project>
 ```
 
-#### B) `pom.xml` con su actualización (Actualizado - Java 21 / Spring Boot 3.3.4)
-*(Archivo activo en [`pom.xml`](./pom.xml))*
-
+#### B) Archivo `pom.xml` con su actualización (Actualizado - Java 21 / Spring Boot 3.3.4 + Plugins de Calidad y Pruebas)
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -173,121 +320,44 @@ El servidor de Integración Continua (Jenkins) fue actualizado y configurado par
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<!-- SonarQube Scanner Plugin -->
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>5.5.0.6356</version>
+			</plugin>
+
+			<!-- JaCoCo Plugin para reporte de cobertura de código -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Maven Surefire Plugin para ejecución de pruebas unitarias -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+			</plugin>
 		</plugins>
 	</build>
 	
-</project>
-```
-
----
-
-### 3.2. Microservicio BackEnd (`Ejercicio5MyAPIGestor`)
-
-#### A) `pom.xml` en su estado normal (Original - Java 11 / Spring Boot 2.7.17)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.17</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.mx.cbtis</groupId>
-	<artifactId>Ejercicio5MyAPIGestor</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>Ejercicio5MyAPIGestor</name>
-	<description>Proyecto My API Rest</description>
-	<properties>
-		<java.version>11</java.version>
-	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mariadb.jdbc</groupId>
-			<artifactId>mariadb-java-client</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
-
-</project>
-```
-
-#### B) `pom.xml` con su actualización (Actualizado - Java 21 / Spring Boot 3.3.4)
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.4</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.mx.cbtis</groupId>
-	<artifactId>Ejercicio5MyAPIGestor</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>Ejercicio5MyAPIGestor</name>
-	<description>Proyecto My API Rest</description>
-	<properties>
-		<java.version>21</java.version>
-	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mariadb.jdbc</groupId>
-			<artifactId>mariadb-java-client</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
-
 </project>
 ```
 
@@ -297,8 +367,12 @@ El servidor de Integración Continua (Jenkins) fue actualizado y configurado par
 
 | Componente / Elemento | Estado Original (Antes) | Estado Actualizado (Después) | Justificación Técnica del Cambio |
 | :--- | :--- | :--- | :--- |
-| **Versión de Java (`<java.version>`)** | `11` (Java 11 LTS) | `21` (Java 21 LTS) | Actualización del compilador (`maven-compiler-plugin` source/target release 21) para aprovechar soporte LTS moderno, mejoras de rendimiento y compatibilidad con Spring Boot 3.x. |
-| **Spring Boot Parent (`spring-boot-starter-parent`)** | `2.7.17` | `3.3.4` | Spring Boot `2.7.x` llegó a su fin de soporte (EOL) y no soporta nativamente el bytecode de Java 21 en todas sus librerías. Spring Boot `3.3.4` ofrece soporte oficial completo para **JDK 21**. |
-| **Migración de `javax.*` a `jakarta.*` (Jakarta EE 10)** | `javax.persistence.*` / `javax.validation.*` | `jakarta.persistence.*` / `jakarta.validation.*` | Al subir de Spring Boot 2.7 a 3.3.4, las entidades JPA (`Proyectos`, `Tareas`, `Usuario`, `Asignaciones`, `Comentarios`) y validaciones migraron del namespace `javax.*` (Java EE 8) a `jakarta.*` (Jakarta EE 10). |
-| **Dependencias FrontEnd (`Ejercicio5Cliente`)** | Bootstrap `5.1.3` | Bootstrap `5.3.3` + `spring-boot-starter-validation` | Se actualizó WebJars Bootstrap a `5.3.3` y se incorporó `spring-boot-starter-validation` para validación de formularios compatible con Jakarta Bean Validation 3.0. |
-| **Entorno de Integración Continua (Jenkins)** | Imagen `jenkins/jenkins:jdk17` | Imagen `jenkins/jenkins:jdk21` + Maven `3.9.0` | Se migró el contenedor de Jenkins a `jdk21` (`/opt/java/openjdk`) y se configuró Apache Maven `3.9.0` para evitar errores `Fatal error compiling: invalid target release: 21`. |
+| **Versión de Java (`<java.version>`)** | `11` (Java 11 LTS) | `21` (Java 21 LTS) | Actualización del bytecode generado a la versión de soporte LTS 21, permitiendo funciones avanzadas de la JVM y compatibilidad con Spring Boot 3.x. |
+| **Spring Boot Parent (`spring-boot-starter-parent`)** | `2.7.17` | `3.3.4` | Spring Boot 2.7 no soporta el runtime de Java 21. La actualización a Spring Boot 3.3.4 brinda soporte nativo a Java 21 y Jakarta EE 10. |
+| **Migración de Namespaces (`javax.*` a `jakarta.*`)** | `javax.persistence.*` / `javax.validation.*` | `jakarta.persistence.*` / `jakarta.validation.*` | Requerimiento estricto de Spring Boot 3+ y Jakarta EE 10 para todas las entidades JPA y anotaciones de validación de modelos. |
+| **SonarQube Maven Plugin (`sonar-maven-plugin`)** | No presente | `5.5.0.6356` | Permite el análisis estático de código fuente, escaneo de vulnerabilidades, deudas técnicas y bugs mediante SonarQube / SonarCloud. |
+| **JaCoCo Plugin (`jacoco-maven-plugin`)** | No presente | `0.8.12` | Habilita la instrumentación del código (`prepare-agent`) y la generación de reportes (`report`) del porcentaje de cobertura de código (code coverage) tras ejecutar los tests. |
+| **Surefire Plugin (`maven-surefire-plugin`)** | Heredado por defecto | `3.2.5` | Garantiza la ejecución estable de pruebas unitarias sobre Java 21 e integración con el agente de cobertura de JaCoCo. |
+| **Dependencia de Validación (`Ejercicio5Cliente`)** | No explícita | `spring-boot-starter-validation` | Spring Boot 3.x separa el soporte de validación a su propio starter; se incorpora para validar formularios en el controlador web. |
+| **WebJars Bootstrap** | `5.1.3` | `5.3.3` | Actualización de componentes visuales y compatibilidad de estilos. |
+| **Entorno CI/CD Jenkins** | Contenedor Jenkins JDK 17 | Contenedor Jenkins JDK 21 + Maven 3.9.0 | Configuración de las herramientas globales (`JDK21` y `M3`) para permitir compilaciones limpias de proyectos en Java 21. |
