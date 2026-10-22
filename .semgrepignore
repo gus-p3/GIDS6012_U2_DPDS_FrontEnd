@@ -2,3 +2,6 @@ target/
 bin/
 .mvn/
 reportes/
+src/main/resources/static/js/jquery-*.js
+src/main/resources/static/js/bootstrap*.js
+src/main/resources/static/js/popper*.js
