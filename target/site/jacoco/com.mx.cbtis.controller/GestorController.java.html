@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GestorController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Ejercicio5Cliente</a> &gt; <a href="index.source.html" class="el_package">com.mx.cbtis.controller</a> &gt; <span class="el_source">GestorController.java</span></div><h1>GestorController.java</h1><pre class="source lang-java linenums">package com.mx.cbtis.controller;
+
+import java.util.*;
+
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.mx.cbtis.modelo.Asignaciones;
+import com.mx.cbtis.modelo.Comentarios;
+import com.mx.cbtis.modelo.Proyectos;
+import com.mx.cbtis.modelo.Tareas;
+import com.mx.cbtis.modelo.Usuario;
+
+@Controller
+<span class="fc" id="L36">public class GestorController {</span>
+<span class="fc" id="L37">	@Value(&quot;${app.api.url:http://localhost:8081}&quot;)</span>
+	private String baseUrl = &quot;http://localhost:8081&quot;;
+	
+	@GetMapping(&quot;/&quot;)
+	public String getHome() {
+<span class="fc" id="L42">		return &quot;home&quot;;</span>
+	}
+	
+	@GetMapping(&quot;/tutorial&quot;)
+	public String getTutorial() {
+<span class="fc" id="L47">		return &quot;tutorial&quot;;</span>
+	}
+	
+	@GetMapping(&quot;/manual&quot;)
+	public String getManual() {
+<span class="fc" id="L52">		return &quot;manual&quot;;</span>
+	}
+	
+	@GetMapping(&quot;/login&quot;)
+	public String getLogin() {
+<span class="fc" id="L57">		return &quot;login&quot;;</span>
+	}
+	
+	@GetMapping(&quot;/register&quot;)
+	public String getRegister(Model modelo) {
+<span class="fc" id="L62">		Usuario usuario = new Usuario();</span>
+<span class="fc" id="L63">		modelo.addAttribute(&quot;usuario&quot;, usuario);</span>
+<span class="fc" id="L64">		return &quot;register&quot;;</span>
+	}
+
+	@PostMapping(&quot;/saveUsuario&quot;)
+	public ModelAndView setSaveUsuario(
+			@Valid @ModelAttribute Usuario usuario,
+			BindingResult bindingResult,
+			@RequestParam(value = &quot;archivoAvatar&quot;, required = false) MultipartFile archivoAvatar) {
+<span class="pc bpc" id="L72" title="1 of 4 branches missed.">		if (bindingResult != null &amp;&amp; bindingResult.hasErrors()) {</span>
+<span class="fc" id="L73">			ModelAndView mav = new ModelAndView(&quot;register&quot;);</span>
+<span class="fc" id="L74">			mav.addObject(&quot;usuario&quot;, usuario);</span>
+<span class="fc" id="L75">			mav.addObject(&quot;error&quot;, &quot;Datos incompletos o inválidos&quot;);</span>
+<span class="fc" id="L76">			return mav;</span>
+		}
+
+		try {
+<span class="pc bpc" id="L80" title="3 of 4 branches missed.">			if (archivoAvatar != null &amp;&amp; !archivoAvatar.isEmpty()) {</span>
+<span class="nc" id="L81">				String rutaDirectorio = &quot;src/main/resources/static/Images/avatars/&quot;;</span>
+<span class="nc" id="L82">				java.nio.file.Path rutaPath = java.nio.file.Paths.get(rutaDirectorio);</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">				if (!java.nio.file.Files.exists(rutaPath)) {</span>
+<span class="nc" id="L85">					java.nio.file.Files.createDirectories(rutaPath);</span>
+				}
+<span class="nc" id="L87">				String nombreArchivo = java.util.UUID.randomUUID() + &quot;_&quot; + archivoAvatar.getOriginalFilename();</span>
+<span class="nc" id="L88">				java.nio.file.Path destino = rutaPath.resolve(nombreArchivo);</span>
+<span class="nc" id="L89">				java.nio.file.Files.copy(archivoAvatar.getInputStream(), destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);</span>
+<span class="nc" id="L90">				usuario.setImagen_usuario(&quot;Images/avatars/&quot; + nombreArchivo);</span>
+<span class="pc bpc" id="L91" title="1 of 4 branches missed.">			} else if (usuario.getImagen_usuario() == null || usuario.getImagen_usuario().trim().isEmpty()) {</span>
+<span class="fc" id="L92">				usuario.setImagen_usuario(&quot;Images/logo.png&quot;);</span>
+			}
+<span class="fc" id="L94">			RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">			String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/addUsuario&quot;;</span>
+<span class="fc" id="L96">			template.postForEntity(urlservicebd, usuario, Integer.class);</span>
+<span class="nc" id="L97">		} catch (Exception e) {</span>
+<span class="nc" id="L98">			System.err.println(&quot;Error al procesar avatar o guardar usuario: &quot; + e.getMessage());</span>
+<span class="fc" id="L99">		}</span>
+<span class="fc" id="L100">		return new ModelAndView(&quot;redirect:/login&quot;);</span>
+	}
+
+	public ModelAndView setSaveUsuario(Usuario usuario, BindingResult bindingResult) {
+<span class="fc" id="L104">		return setSaveUsuario(usuario, bindingResult, null);</span>
+	}
+
+	public ModelAndView setSaveUsuario(Usuario usuario) {
+<span class="fc" id="L108">		org.springframework.validation.BeanPropertyBindingResult result = </span>
+				new org.springframework.validation.BeanPropertyBindingResult(usuario, &quot;usuario&quot;);
+<span class="pc bpc" id="L110" title="1 of 4 branches missed.">		if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty() ||</span>
+<span class="pc bpc" id="L111" title="2 of 4 branches missed.">		    usuario.getCorreo_electronico() == null || !usuario.getCorreo_electronico().contains(&quot;@&quot;) ||</span>
+<span class="pc bpc" id="L112" title="2 of 4 branches missed.">		    usuario.getContrasena() == null || usuario.getContrasena().trim().isEmpty()) {</span>
+<span class="fc" id="L113">			result.reject(&quot;invalido&quot;, &quot;Datos incompletos o inválidos&quot;);</span>
+		}
+<span class="fc" id="L115">		return setSaveUsuario(usuario, result, null);</span>
+	}
+	
+	@GetMapping(&quot;/inicio&quot;)
+	public String getInicio(Model modelo) {
+<span class="fc" id="L120">		Proyectos proyectos = new Proyectos();</span>
+<span class="fc" id="L121">		modelo.addAttribute(&quot;proyectos&quot;, proyectos);</span>
+<span class="fc" id="L122">		return &quot;inicio&quot;;</span>
+	}
+
+	@PostMapping(&quot;/saveProyecto&quot;)
+	public ModelAndView setSaveProyecto(@Valid @ModelAttribute Proyectos proyecto, BindingResult bindingResult) {
+<span class="pc bpc" id="L127" title="1 of 4 branches missed.">		if (bindingResult != null &amp;&amp; bindingResult.hasErrors()) {</span>
+<span class="fc" id="L128">			ModelAndView mav = new ModelAndView(&quot;inicio&quot;);</span>
+<span class="fc" id="L129">			mav.addObject(&quot;proyectos&quot;, proyecto);</span>
+<span class="fc" id="L130">			return mav;</span>
+		}
+
+		try {
+<span class="fc" id="L134">			RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">			String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/addProyecto&quot;;</span>
+<span class="fc" id="L136">			template.postForEntity(urlservicebd, proyecto, Integer.class);</span>
+<span class="nc" id="L137">		} catch (Exception e) {</span>
+<span class="nc" id="L138">			System.err.println(&quot;Error al guardar proyecto: &quot; + e.getMessage());</span>
+<span class="fc" id="L139">		}</span>
+
+<span class="fc" id="L141">		return new ModelAndView(&quot;redirect:/inicio&quot;);</span>
+	}
+
+	public ModelAndView setSaveProyecto(Proyectos proyecto) {
+<span class="fc" id="L145">		org.springframework.validation.BeanPropertyBindingResult result = </span>
+				new org.springframework.validation.BeanPropertyBindingResult(proyecto, &quot;proyecto&quot;);
+<span class="pc bpc" id="L147" title="1 of 4 branches missed.">		if (proyecto.getNombre() == null || proyecto.getNombre().trim().isEmpty()) {</span>
+<span class="fc" id="L148">			result.reject(&quot;invalido&quot;, &quot;Nombre obligatorio&quot;);</span>
+		}
+<span class="fc" id="L150">		return setSaveProyecto(proyecto, result);</span>
+	}
+
+	@PostMapping(&quot;/consultarProyectos&quot;)
+	public ResponseEntity&lt;Object&gt; consultarProyectos(Model modelo) {
+<span class="fc" id="L155">		RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">		String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/buscarProyectos&quot;;</span>
+<span class="fc" id="L157">		HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L158">		headers.setContentType(MediaType.APPLICATION_JSON);</span>
+
+		try {
+<span class="fc" id="L161">			Proyectos[] response = template.postForObject(urlservicebd, headers, Proyectos[].class);</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">			List&lt;Proyectos&gt; proyectos = (response != null) ? Arrays.asList(response) : Collections.emptyList();</span>
+<span class="fc" id="L163">			modelo.addAttribute(&quot;listaProyectos&quot;, proyectos);</span>
+
+<span class="fc" id="L165">			return new ResponseEntity&lt;&gt;(proyectos, HttpStatus.OK);</span>
+<span class="fc" id="L166">		} catch (Exception e) {</span>
+<span class="fc" id="L167">			System.err.println(&quot;Error al conectar con el backend de proyectos: &quot; + e.getMessage());</span>
+<span class="fc" id="L168">			modelo.addAttribute(&quot;listaProyectos&quot;, Collections.emptyList());</span>
+
+<span class="fc" id="L170">			return new ResponseEntity&lt;&gt;(Collections.emptyList(), HttpStatus.SERVICE_UNAVAILABLE);</span>
+		}
+	}
+
+	@PostMapping(&quot;/eliminarProyecto&quot;)
+	public ModelAndView eliminarProyecto(@RequestBody Proyectos proyecto) {
+		try {
+<span class="fc" id="L177">			RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">			String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/deleteProyecto&quot;;</span>
+<span class="fc" id="L179">			HttpEntity&lt;Proyectos&gt; request = new HttpEntity&lt;Proyectos&gt;(proyecto); </span>
+<span class="fc" id="L180">			template.exchange(urlservicebd, HttpMethod.DELETE, request, Integer.class);</span>
+<span class="nc" id="L181">		} catch (Exception e) {</span>
+<span class="nc" id="L182">			System.err.println(&quot;Error al eliminar proyecto: &quot; + e.getMessage());</span>
+<span class="fc" id="L183">		}</span>
+	
+<span class="fc" id="L185">		return new ModelAndView(&quot;redirect:/inicio&quot;);</span>
+	}
+	
+	@PostMapping (&quot;/actualizarProyecto&quot;)
+	public ResponseEntity&lt;Object&gt; updateProyecto(@RequestBody Proyectos proyecto) {
+<span class="fc" id="L190">		RestTemplate template = new RestTemplate();</span>
+<span class="fc" id="L191">		Map&lt;String,Integer&gt; params = new HashMap&lt;String,Integer&gt;();</span>
+<span class="fc" id="L192">		params.put(&quot;id_proyecto&quot;, proyecto.getId_proyecto());</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">		String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/buscarProyecto?id_proyecto={id_proyecto}&quot;;</span>
+		
+		try {
+<span class="fc" id="L196">			Proyectos proyectos = template.getForObject(urlservicebd, Proyectos.class, params);</span>
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">			if (proyectos == null) {</span>
+<span class="nc" id="L198">				return new ResponseEntity&lt;&gt;(&quot;Proyecto no encontrado&quot;, HttpStatus.NOT_FOUND);</span>
+			}
+<span class="fc" id="L200">			return new ResponseEntity&lt;Object&gt;(proyectos, HttpStatus.OK);</span>
+<span class="fc" id="L201">		} catch (HttpClientErrorException e) {</span>
+<span class="fc" id="L202">			System.err.println(&quot;Proyecto no encontrado (404): &quot; + e.getMessage());</span>
+<span class="fc" id="L203">			return new ResponseEntity&lt;&gt;(&quot;Proyecto no encontrado&quot;, e.getStatusCode());</span>
+<span class="nc" id="L204">		} catch (Exception e) {</span>
+<span class="nc" id="L205">			System.err.println(&quot;Error al consultar proyecto: &quot; + e.getMessage());</span>
+<span class="nc" id="L206">			return new ResponseEntity&lt;&gt;(&quot;Error al consultar proyecto&quot;, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+	}
+	
+	@PostMapping(&quot;/verificarLogin&quot;)
+	public ResponseEntity&lt;Usuario&gt; verificarUsuario(@RequestBody Usuario paramUser) {
+		try {
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">			String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/getUsuarioLogin&quot;;</span>
+<span class="fc" id="L214">			RestTemplate template = new RestTemplate();</span>
+<span class="fc" id="L215">			return template.postForEntity(urlservicebd, paramUser, Usuario.class);</span>
+<span class="fc" id="L216">		} catch (Exception e) {</span>
+<span class="fc" id="L217">			System.err.println(&quot;Error al verificar login: &quot; + e.getMessage());</span>
+<span class="fc" id="L218">			return new ResponseEntity&lt;&gt;(HttpStatus.UNAUTHORIZED);</span>
+		}
+	}
+	
+	@PostMapping(&quot;/consultarUsuarios&quot;)
+	public ResponseEntity&lt;Object&gt; consultarUsuarios(Model modelo) {
+<span class="fc" id="L224">		RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">		String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/buscarUsuarios&quot;;</span>
+<span class="fc" id="L226">		HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L227">		headers.setContentType(MediaType.APPLICATION_JSON);</span>
+		try {
+<span class="fc" id="L229">			Usuario[] response = template.postForObject(urlservicebd, headers, Usuario[].class);</span>
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">			List&lt;Usuario&gt; usuarios = (response != null) ? Arrays.asList(response) : Collections.emptyList();</span>
+<span class="fc" id="L231">			modelo.addAttribute(&quot;listaUsuarios&quot;, usuarios);</span>
+
+<span class="fc" id="L233">			return new ResponseEntity&lt;Object&gt;(usuarios, HttpStatus.OK);</span>
+<span class="fc" id="L234">		} catch (Exception e) {</span>
+<span class="fc" id="L235">			System.err.println(&quot;Error al consultar usuarios: &quot; + e.getMessage());</span>
+<span class="fc" id="L236">			modelo.addAttribute(&quot;listaUsuarios&quot;, Collections.emptyList());</span>
+<span class="fc" id="L237">			return new ResponseEntity&lt;&gt;(Collections.emptyList(), HttpStatus.SERVICE_UNAVAILABLE);</span>
+		}
+	}
+	
+	@PostMapping(&quot;/obtenerTareas&quot;)
+	public ResponseEntity&lt;List&lt;Tareas&gt;&gt; obtenerTareas(@RequestBody Tareas idProyecto, Model modelo) {
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">	    String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/getTarea&quot;;</span>
+<span class="fc" id="L244">	    RestTemplate template = new RestTemplate();</span>
+<span class="fc" id="L245">	    HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L246">	    headers.setContentType(MediaType.APPLICATION_JSON);</span>
+		try {
+<span class="fc" id="L248">	    	Tareas[] response = template.postForObject(urlservicebd, idProyecto, Tareas[].class);</span>
+<span class="pc bpc" id="L249" title="1 of 2 branches missed.">            List&lt;Tareas&gt; listaTareas = (response != null) ? Arrays.asList(response) : Collections.emptyList();</span>
+<span class="fc" id="L250">			modelo.addAttribute(&quot;tareas&quot;, listaTareas);</span>
+<span class="fc" id="L251">			return ResponseEntity.ok(listaTareas);</span>
+<span class="fc" id="L252">		} catch (Exception e) {</span>
+<span class="fc" id="L253">			System.err.println(&quot;Error al conectar con el backend de tareas: &quot; + e.getMessage());</span>
+<span class="fc" id="L254">			modelo.addAttribute(&quot;tareas&quot;, Collections.emptyList());</span>
+<span class="fc" id="L255">			return new ResponseEntity&lt;&gt;(Collections.emptyList(), HttpStatus.SERVICE_UNAVAILABLE);</span>
+		}
+	}
+	
+	@PostMapping(&quot;/obtenerComentarios&quot;)
+	public ResponseEntity&lt;List&lt;Comentarios&gt;&gt; obtenerComentarios(@RequestBody Comentarios idComentario, Model modelo) {
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">	    String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/getComentario&quot;;</span>
+<span class="fc" id="L262">	    RestTemplate template = new RestTemplate();</span>
+<span class="fc" id="L263">	    HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L264">	    headers.setContentType(MediaType.APPLICATION_JSON);</span>
+	    try {
+<span class="fc" id="L266">	    	Comentarios[] response = template.postForObject(urlservicebd, idComentario, Comentarios[].class);</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">	    	List&lt;Comentarios&gt; listaComentarios = (response != null) ? Arrays.asList(response) : Collections.emptyList();</span>
+<span class="fc" id="L268">	    	modelo.addAttribute(&quot;comentarios&quot;, listaComentarios);</span>
+<span class="fc" id="L269">	    	return ResponseEntity.ok(listaComentarios);</span>
+<span class="fc" id="L270">	    } catch (Exception e) {</span>
+<span class="fc" id="L271">	    	System.err.println(&quot;Error al conectar con backend de comentarios: &quot; + e.getMessage());</span>
+<span class="fc" id="L272">	    	modelo.addAttribute(&quot;comentarios&quot;, Collections.emptyList());</span>
+<span class="fc" id="L273">	    	return new ResponseEntity&lt;&gt;(Collections.emptyList(), HttpStatus.SERVICE_UNAVAILABLE);</span>
+	    }
+	}
+	
+	@GetMapping(&quot;/proyecto&quot;)
+	public String getProyecto(Model modelo) {
+<span class="fc" id="L279">		Tareas tarea = new Tareas();</span>
+<span class="fc" id="L280">		modelo.addAttribute(&quot;tarea&quot;, tarea);</span>
+		
+<span class="fc" id="L282">		Comentarios comentario = new Comentarios();</span>
+<span class="fc" id="L283">		modelo.addAttribute(&quot;comentarios&quot;, comentario);</span>
+		
+		try {
+<span class="fc" id="L286">			RestTemplate template = new RestTemplate();</span>
+<span class="fc" id="L287">			HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L288">			headers.setContentType(MediaType.APPLICATION_JSON);</span>
+			
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">			String urlservicebdUsuario = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/buscarUsuarios&quot;;</span>
+<span class="fc" id="L291">			Usuario[] responseUsuario = template.postForObject(urlservicebdUsuario, headers, Usuario[].class);  </span>
+<span class="pc bpc" id="L292" title="1 of 2 branches missed.">			List&lt;Usuario&gt; usuarios = (responseUsuario != null) ? Arrays.asList(responseUsuario) : Collections.emptyList();</span>
+<span class="fc" id="L293">			modelo.addAttribute(&quot;listaUsuarios&quot;, usuarios);</span>
+<span class="fc" id="L294">		} catch (Exception e) {</span>
+<span class="fc" id="L295">			System.err.println(&quot;Error al cargar usuarios en getProyecto: &quot; + e.getMessage());</span>
+<span class="fc" id="L296">			modelo.addAttribute(&quot;listaUsuarios&quot;, Collections.emptyList());</span>
+<span class="fc" id="L297">		}</span>
+		
+<span class="fc" id="L299">		return &quot;proyecto&quot;;</span>
+	}
+	
+	@GetMapping(&quot;/tarea&quot;)
+	public String getTarea(Model modelo) {
+<span class="fc" id="L304">		Tareas tareas = new Tareas();</span>
+<span class="fc" id="L305">		modelo.addAttribute(&quot;tareas&quot;, tareas);</span>
+<span class="fc" id="L306">		return &quot;proyecto&quot;;</span>
+	}
+	
+	@PostMapping(&quot;/saveTarea&quot;)
+	public ModelAndView setSaveTareas(@ModelAttribute Tareas tareas) {
+		try {
+<span class="fc" id="L312">			RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">			String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/addTareas&quot;;</span>
+<span class="fc" id="L314">			template.postForEntity(urlservicebd, tareas, Integer.class);</span>
+<span class="fc" id="L315">		} catch (Exception e) {</span>
+<span class="fc" id="L316">			System.err.println(&quot;Error al guardar tarea: &quot; + e.getMessage());</span>
+<span class="fc" id="L317">		}</span>
+
+<span class="fc" id="L319">		ModelAndView mav = new ModelAndView(&quot;redirect:/proyecto&quot;);</span>
+<span class="fc" id="L320">		mav.addObject(&quot;id_proyecto&quot;, tareas.getId_proyecto());</span>
+<span class="fc" id="L321">		return mav;</span>
+	}
+
+	@PostMapping(&quot;/saveComentario&quot;)
+	public String setSaveComentario(@RequestBody Comentarios comentarios) {
+		try {
+<span class="fc" id="L327">			RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L328" title="1 of 2 branches missed.">			String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/addComentario&quot;;</span>
+<span class="fc" id="L329">			template.postForEntity(urlservicebd, comentarios, Integer.class); </span>
+<span class="fc" id="L330">		} catch (Exception e) {</span>
+<span class="fc" id="L331">			System.err.println(&quot;Error al guardar comentario: &quot; + e.getMessage());</span>
+<span class="fc" id="L332">		}</span>
+		
+<span class="fc" id="L334">		return &quot;proyecto&quot;;</span>
+	}
+	
+	@PostMapping(&quot;/actualizarTarea&quot;)
+	public ResponseEntity&lt;Object&gt; updateTarea(@RequestBody Tareas tarea) {
+<span class="fc" id="L339">		RestTemplate template = new RestTemplate();</span>
+<span class="fc" id="L340">		Map&lt;String,Integer&gt; params = new HashMap&lt;String,Integer&gt;();</span>
+<span class="fc" id="L341">		params.put(&quot;id_tarea&quot;, tarea.getId_tarea());</span>
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">		String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/buscarTarea?id_tarea={id_tarea}&quot;;</span>
+		
+		try {
+<span class="fc" id="L345">			Tareas tareas = template.getForObject(urlservicebd, Tareas.class, params);</span>
+<span class="pc bpc" id="L346" title="1 of 2 branches missed.">			if (tareas == null) {</span>
+<span class="nc" id="L347">				return new ResponseEntity&lt;&gt;(&quot;Tarea no encontrada&quot;, HttpStatus.NOT_FOUND);</span>
+			}
+<span class="fc" id="L349">			return new ResponseEntity&lt;Object&gt;(tareas, HttpStatus.OK);</span>
+<span class="fc" id="L350">		} catch (HttpClientErrorException e) {</span>
+<span class="fc" id="L351">			System.err.println(&quot;Tarea no encontrada (404): &quot; + e.getMessage());</span>
+<span class="fc" id="L352">			return new ResponseEntity&lt;&gt;(&quot;Tarea no encontrada&quot;, e.getStatusCode());</span>
+<span class="nc" id="L353">		} catch (Exception e) {</span>
+<span class="nc" id="L354">			System.err.println(&quot;Error al actualizar tarea: &quot; + e.getMessage());</span>
+<span class="nc" id="L355">			return new ResponseEntity&lt;&gt;(&quot;Error al actualizar tarea&quot;, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+	}
+	
+	@PostMapping(&quot;/eliminarTarea&quot;)
+	public ModelAndView eliminarTarea(@RequestBody Tareas tareas) {
+		try {
+<span class="fc" id="L362">			RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L363" title="1 of 2 branches missed.">			String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/deleteTareas&quot;;</span>
+<span class="fc" id="L364">			HttpEntity&lt;Tareas&gt; request = new HttpEntity&lt;Tareas&gt;(tareas);</span>
+<span class="fc" id="L365">			template.exchange(urlservicebd, HttpMethod.DELETE, request, Integer.class);</span>
+<span class="fc" id="L366">		} catch (Exception e) {</span>
+<span class="fc" id="L367">			System.err.println(&quot;Error al eliminar tarea: &quot; + e.getMessage());</span>
+<span class="fc" id="L368">		}</span>
+		
+<span class="fc" id="L370">		return new ModelAndView(&quot;redirect:/proyecto&quot;);</span>
+	}
+	
+	@PostMapping(&quot;/verificarTarea&quot;)
+	public ResponseEntity&lt;Integer&gt; verificarTarea(@RequestBody Tareas paramName){
+		try {
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">			String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/addTareas&quot;;</span>
+<span class="fc" id="L377">			RestTemplate template = new RestTemplate();</span>
+<span class="fc" id="L378">			return template.postForEntity(urlservicebd, paramName, Integer.class);</span>
+<span class="fc" id="L379">		} catch (Exception e) {</span>
+<span class="fc" id="L380">			System.err.println(&quot;Error al verificar tarea: &quot; + e.getMessage());</span>
+<span class="fc" id="L381">			return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+	}
+	
+	@PostMapping(&quot;/cambiosTareas&quot;)
+	public ResponseEntity&lt;Integer&gt; cambiosTareas(@RequestBody Tareas paramDatos){
+		try {
+<span class="pc bpc" id="L388" title="1 of 2 branches missed.">			String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/addTareas&quot;;</span>
+<span class="fc" id="L389">			RestTemplate template = new RestTemplate();</span>
+<span class="fc" id="L390">			return template.postForEntity(urlservicebd, paramDatos, Integer.class);</span>
+<span class="fc" id="L391">		} catch (Exception e) {</span>
+<span class="fc" id="L392">			System.err.println(&quot;Error en cambios tareas: &quot; + e.getMessage());</span>
+<span class="fc" id="L393">			return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+	}
+	
+	@PostMapping(&quot;/consultarTareas&quot;)
+	public ResponseEntity&lt;Object&gt; consultarTareas() {	
+<span class="fc" id="L399">		RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L400" title="1 of 2 branches missed.">		String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/buscarTareas&quot;;</span>
+<span class="fc" id="L401">		HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L402">		headers.setContentType(MediaType.APPLICATION_JSON);</span>
+		try {
+<span class="fc" id="L404">			Tareas[] response = template.postForObject(urlservicebd, headers, Tareas[].class);</span>
+<span class="pc bpc" id="L405" title="1 of 2 branches missed.">			List&lt;Tareas&gt; tareas = (response != null) ? Arrays.asList(response) : Collections.emptyList();</span>
+<span class="fc" id="L406">			return new ResponseEntity&lt;Object&gt;(tareas, HttpStatus.OK);</span>
+<span class="fc" id="L407">		} catch (Exception e) {</span>
+<span class="fc" id="L408">			System.err.println(&quot;Error al consultar tareas: &quot; + e.getMessage());</span>
+<span class="fc" id="L409">			return new ResponseEntity&lt;&gt;(Collections.emptyList(), HttpStatus.SERVICE_UNAVAILABLE);</span>
+		}
+	}
+	
+	@PostMapping(&quot;/consultarComentarios&quot;)
+	public ResponseEntity&lt;Object&gt; consultarComentarios() {	
+<span class="fc" id="L415">		RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L416" title="1 of 2 branches missed.">		String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/buscarComentarios&quot;;</span>
+<span class="fc" id="L417">		HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L418">		headers.setContentType(MediaType.APPLICATION_JSON);</span>
+		try {
+<span class="fc" id="L420">			Comentarios[] response = template.postForObject(urlservicebd, headers, Comentarios[].class);</span>
+<span class="pc bpc" id="L421" title="1 of 2 branches missed.">			List&lt;Comentarios&gt; comentarios = (response != null) ? Arrays.asList(response) : Collections.emptyList();</span>
+<span class="fc" id="L422">			return new ResponseEntity&lt;Object&gt;(comentarios, HttpStatus.OK);</span>
+<span class="fc" id="L423">		} catch (Exception e) {</span>
+<span class="fc" id="L424">			System.err.println(&quot;Error al consultar comentarios: &quot; + e.getMessage());</span>
+<span class="fc" id="L425">			return new ResponseEntity&lt;&gt;(Collections.emptyList(), HttpStatus.SERVICE_UNAVAILABLE);</span>
+		}
+	}
+	
+	@PostMapping(&quot;/updateAsignacion&quot;)
+	public ResponseEntity&lt;Integer&gt; updateAsignacion(@RequestBody Asignaciones asignacion) {
+		try {
+<span class="fc" id="L432">			RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L433" title="1 of 2 branches missed.">			String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/updateAsignacion&quot;;</span>
+<span class="fc" id="L434">			return template.postForEntity(urlservicebd, asignacion, Integer.class);</span>
+<span class="fc" id="L435">		} catch (Exception e) {</span>
+<span class="fc" id="L436">			System.err.println(&quot;Error al actualizar asignación: &quot; + e.getMessage());</span>
+<span class="fc" id="L437">			return new ResponseEntity&lt;&gt;(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+		}
+	}
+
+	@PostMapping(&quot;/consultarAsignaciones&quot;)
+	public ResponseEntity&lt;Object&gt; consultarAsignaciones() {
+<span class="fc" id="L443">		RestTemplate template = new RestTemplate();</span>
+<span class="pc bpc" id="L444" title="1 of 2 branches missed.">		String urlservicebd = (baseUrl != null ? baseUrl : &quot;http://localhost:8081&quot;) + &quot;/buscarAsignaciones&quot;;</span>
+<span class="fc" id="L445">		HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L446">		headers.setContentType(MediaType.APPLICATION_JSON);</span>
+		try {
+<span class="fc" id="L448">			Asignaciones[] response = template.postForObject(urlservicebd, headers, Asignaciones[].class);</span>
+<span class="pc bpc" id="L449" title="1 of 2 branches missed.">			List&lt;Asignaciones&gt; lista = (response != null) ? Arrays.asList(response) : Collections.emptyList();</span>
+<span class="fc" id="L450">			return new ResponseEntity&lt;Object&gt;(lista, HttpStatus.OK);</span>
+<span class="fc" id="L451">		} catch (Exception e) {</span>
+<span class="fc" id="L452">			System.err.println(&quot;Error al consultar asignaciones: &quot; + e.getMessage());</span>
+<span class="fc" id="L453">			return new ResponseEntity&lt;&gt;(Collections.emptyList(), HttpStatus.SERVICE_UNAVAILABLE);</span>
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

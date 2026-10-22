@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Proyectos.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Ejercicio5Cliente</a> &gt; <a href="index.source.html" class="el_package">com.mx.cbtis.modelo</a> &gt; <span class="el_source">Proyectos.java</span></div><h1>Proyectos.java</h1><pre class="source lang-java linenums">package com.mx.cbtis.modelo;
+
+import jakarta.validation.constraints.NotBlank;
+
+public class Proyectos {
+
+	private Integer id_proyecto;
+
+	@NotBlank(message = &quot;El nombre del proyecto es obligatorio&quot;)
+	private String nombre;
+
+	@NotBlank(message = &quot;La descripción es obligatoria&quot;)
+	private String descripcion;
+
+	@NotBlank(message = &quot;La fecha de inicio es obligatoria&quot;)
+	private String fecha_inicio;
+
+	@NotBlank(message = &quot;La fecha de finalización es obligatoria&quot;)
+	private String fecha_finalizacion;
+
+	@NotBlank(message = &quot;El estado del proyecto es obligatorio&quot;)
+	private String estado_proyecto;
+
+	private String fondo;
+	
+	public Proyectos() {
+<span class="fc" id="L27">		super();</span>
+<span class="fc" id="L28">	}</span>
+
+	public Proyectos(Integer id_proyecto, String nombre, String descripcion, String fecha_inicio,
+			String fecha_finalizacion, String estado_proyecto, String fondo) {
+<span class="fc" id="L32">		super();</span>
+<span class="fc" id="L33">		this.id_proyecto = id_proyecto;</span>
+<span class="fc" id="L34">		this.nombre = nombre;</span>
+<span class="fc" id="L35">		this.descripcion = descripcion;</span>
+<span class="fc" id="L36">		this.fecha_inicio = fecha_inicio;</span>
+<span class="fc" id="L37">		this.fecha_finalizacion = fecha_finalizacion;</span>
+<span class="fc" id="L38">		this.estado_proyecto = estado_proyecto;</span>
+<span class="fc" id="L39">		this.fondo = fondo;</span>
+<span class="fc" id="L40">	}</span>
+
+	public Integer getId_proyecto() {
+<span class="fc" id="L43">		return id_proyecto;</span>
+	}
+
+	public void setId_proyecto(Integer id_proyecto) {
+<span class="fc" id="L47">		this.id_proyecto = id_proyecto;</span>
+<span class="fc" id="L48">	}</span>
+
+	public String getNombre() {
+<span class="fc" id="L51">		return nombre;</span>
+	}
+
+	public void setNombre(String nombre) {
+<span class="fc" id="L55">		this.nombre = nombre;</span>
+<span class="fc" id="L56">	}</span>
+
+	public String getDescripcion() {
+<span class="fc" id="L59">		return descripcion;</span>
+	}
+
+	public void setDescripcion(String descripcion) {
+<span class="fc" id="L63">		this.descripcion = descripcion;</span>
+<span class="fc" id="L64">	}</span>
+
+	public String getFecha_inicio() {
+<span class="fc" id="L67">		return fecha_inicio;</span>
+	}
+
+	public void setFecha_inicio(String fecha_inicio) {
+<span class="fc" id="L71">		this.fecha_inicio = fecha_inicio;</span>
+<span class="fc" id="L72">	}</span>
+
+	public String getFecha_finalizacion() {
+<span class="fc" id="L75">		return fecha_finalizacion;</span>
+	}
+
+	public void setFecha_finalizacion(String fecha_finalizacion) {
+<span class="fc" id="L79">		this.fecha_finalizacion = fecha_finalizacion;</span>
+<span class="fc" id="L80">	}</span>
+
+	public String getEstado_proyecto() {
+<span class="fc" id="L83">		return estado_proyecto;</span>
+	}
+
+	public void setEstado_proyecto(String estado_proyecto) {
+<span class="fc" id="L87">		this.estado_proyecto = estado_proyecto;</span>
+<span class="fc" id="L88">	}</span>
+
+	public String getFondo() {
+<span class="fc" id="L91">		return fondo;</span>
+	}
+
+	public void setFondo(String fondo) {
+<span class="fc" id="L95">		this.fondo = fondo;</span>
+<span class="fc" id="L96">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

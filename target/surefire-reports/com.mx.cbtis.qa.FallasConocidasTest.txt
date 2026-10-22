@@ -1,16 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.mx.cbtis.qa.FallasConocidasTest
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.045 s <<< FAILURE! -- in com.mx.cbtis.qa.FallasConocidasTest
-com.mx.cbtis.qa.FallasConocidasTest.UI_14_creacionTarea_debePermitirDescripcionYAsignacion -- Time elapsed: 0.018 s <<< FAILURE!
-org.opentest4j.AssertionFailedError: FALLO ESPERADO (UI-14): La interfaz de creación rápida de tarea únicamente captura el nombre; no ofrece campos para descripción, fecha de vencimiento ni asignación de integrante ==> expected: <true> but was: <false>
-	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
-	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
-	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
-	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
-	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
-	at com.mx.cbtis.qa.FallasConocidasTest.UI_14_creacionTarea_debePermitirDescripcionYAsignacion(FallasConocidasTest.java:55)
-	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
-	at java.base/java.util.ArrayList.forEach(Unknown Source)
-	at java.base/java.util.ArrayList.forEach(Unknown Source)
-
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.036 s -- in com.mx.cbtis.qa.FallasConocidasTest

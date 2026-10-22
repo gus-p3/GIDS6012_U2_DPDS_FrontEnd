@@ -1,5 +1,6 @@
 com\mx\cbtis\qa\FallasConocidasTest.class
 com\mx\cbtis\qa\FormularioValidacionTest.class
+com\mx\cbtis\qa\GestorControllerCoverageTest.class
 com\mx\cbtis\qa\ProyectoServicioConsultaTest.class
 com\mx\cbtis\bromitas\Ejercicio5ClienteApplicationTests.class
 com\mx\cbtis\qa\DashboardVistaTest.class
