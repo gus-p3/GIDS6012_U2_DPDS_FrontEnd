@@ -52,7 +52,7 @@ public class GestorController {
 	private static final String ENDPOINT_BUSCAR_USUARIOS = "/buscarUsuarios";
 	private static final String MSG_PROYECTO_NO_ENCONTRADO = "Proyecto no encontrado";
 
-	@Value("${app.api.url:}")
+	@Value("${app.api.url:http://localhost:8081}")
 	private String baseUrl = DEFAULT_API_BASE;
 
 	private String buildUrl(String endpoint) {
