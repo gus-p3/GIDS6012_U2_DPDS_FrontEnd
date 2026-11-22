@@ -1,0 +1,7 @@
+target/
+.git/
+.idea/
+*.iml
+reportes/
+README.md
+HELP.md
