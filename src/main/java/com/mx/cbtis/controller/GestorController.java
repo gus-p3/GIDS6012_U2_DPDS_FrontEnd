@@ -64,6 +64,10 @@ public class GestorController {
 		return new RestTemplate();
 	}
 
+	private <T> ResponseEntity<T> toCleanResponse(ResponseEntity<T> response) {
+		return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+	}
+
 	@GetMapping("/")
 	public String getHome() {
 		return "home";
@@ -228,7 +232,7 @@ public class GestorController {
 	@PostMapping("/verificarLogin")
 	public ResponseEntity<Usuario> verificarUsuario(@RequestBody Usuario paramUser) {
 		try {
-			return createClient().postForEntity(buildUrl("/getUsuarioLogin"), paramUser, Usuario.class);
+			return toCleanResponse(createClient().postForEntity(buildUrl("/getUsuarioLogin"), paramUser, Usuario.class));
 		} catch (Exception e) {
 			LOGGER.error("Error al verificar login: {}", e.getMessage());
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -374,7 +378,7 @@ public class GestorController {
 	@PostMapping("/verificarTarea")
 	public ResponseEntity<Integer> verificarTarea(@RequestBody Tareas paramName) {
 		try {
-			return createClient().postForEntity(buildUrl(ENDPOINT_ADD_TAREAS), paramName, Integer.class);
+			return toCleanResponse(createClient().postForEntity(buildUrl(ENDPOINT_ADD_TAREAS), paramName, Integer.class));
 		} catch (Exception e) {
 			LOGGER.error("Error al verificar tarea: {}", e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -384,7 +388,7 @@ public class GestorController {
 	@PostMapping("/cambiosTareas")
 	public ResponseEntity<Integer> cambiosTareas(@RequestBody Tareas paramDatos) {
 		try {
-			return createClient().postForEntity(buildUrl(ENDPOINT_ADD_TAREAS), paramDatos, Integer.class);
+			return toCleanResponse(createClient().postForEntity(buildUrl(ENDPOINT_ADD_TAREAS), paramDatos, Integer.class));
 		} catch (Exception e) {
 			LOGGER.error("Error en cambios tareas: {}", e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -422,7 +426,7 @@ public class GestorController {
 	@PostMapping("/updateAsignacion")
 	public ResponseEntity<Integer> updateAsignacion(@RequestBody Asignaciones asignacion) {
 		try {
-			return createClient().postForEntity(buildUrl("/updateAsignacion"), asignacion, Integer.class);
+			return toCleanResponse(createClient().postForEntity(buildUrl("/updateAsignacion"), asignacion, Integer.class));
 		} catch (Exception e) {
 			LOGGER.error("Error al actualizar asignación: {}", e.getMessage());
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
