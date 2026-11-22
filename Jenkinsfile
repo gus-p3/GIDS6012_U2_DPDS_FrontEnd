@@ -66,7 +66,7 @@ pipeline {
                                         variable: 'RAILWAY_TOKEN')]) {
                     sh '''
                         railway --version
-                        railway up --service frontend --ci
+                        railway redeploy --service frontend --from-source --yes
                     '''
                 }
             }
