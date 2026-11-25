@@ -32,11 +32,18 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarServer') {
                     sh '''
+                        SONAR_URL="${SONAR_HOST_URL:-http://host.docker.internal:9000}"
+                        TOKEN_VAL="${SONAR_AUTH_TOKEN:-${SONAR_TOKEN:-}}"
+                        TOKEN_ARG=""
+                        if [ -n "$TOKEN_VAL" ]; then
+                            TOKEN_ARG="-Dsonar.token=$TOKEN_VAL"
+                        fi
                         bash "$MAVEN_HOME/bin/mvn" \
                         org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar \
                         -Dsonar.projectKey=Ejercicio5Cliente \
                         -Dsonar.projectName="Ejercicio5Cliente" \
-                        -Dsonar.host.url=http://host.docker.internal:9000 \
+                        -Dsonar.host.url="$SONAR_URL" \
+                        $TOKEN_ARG \
                         -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
                     '''
                 }
@@ -46,16 +53,24 @@ pipeline {
             steps {
                 sh '''
                     mkdir -p reportes
-                    docker run --rm \
-                    --network bridge \
-                    -v "${WORKSPACE}":/src \
-                    -w /src \
-                    semgrep/semgrep \
-                    semgrep scan \
-                    --config=auto \
-                    --json \
-                    --output=reportes/semgrep.json \
-                    .
+                    if command -v semgrep >/dev/null 2>&1; then
+                        semgrep scan \
+                            --config=auto \
+                            --json \
+                            --output=reportes/semgrep.json \
+                            .
+                    else
+                        docker run --rm \
+                        --network bridge \
+                        -v "${WORKSPACE}":/src \
+                        -w /src \
+                        semgrep/semgrep \
+                        semgrep scan \
+                        --config=auto \
+                        --json \
+                        --output=reportes/semgrep.json \
+                        .
+                    fi
                 '''
             }
         }
