@@ -1,9 +1,5 @@
 pipeline {
     agent any
-    options {
-        skipDefaultCheckout(true)
-        buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '3'))
-    }
     tools {
         maven 'M3'
         jdk 'JDK21'
@@ -12,19 +8,11 @@ pipeline {
         PATH = "${env.JENKINS_HOME}/.railway/bin:${env.PATH}"
     }
     stages {
-        stage('Clean Workspace') {
-            steps {
-                deleteDir()
-            }
-        }
         stage('Checkout') {
             steps {
-                script {
-                    def scmVars = git branch: 'main',
-                        credentialsId: 'github-credentials',
-                        url: 'https://github.com/gus-p3/GIDS6012_U2_DPDS_FrontEnd.git'
-                    env.GIT_BRANCH = scmVars.GIT_BRANCH ?: 'main'
-                }
+                git branch: 'main',
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/gus-p3/GIDS6012_U2_DPDS_FrontEnd.git'
             }
         }
         stage('Ver Directorio') {
@@ -113,7 +101,6 @@ pipeline {
             archiveArtifacts artifacts: 'reportes/semgrep.json',
             allowEmptyArchive: true,
             fingerprint: true
-            deleteDir()
         }
     }
 }
